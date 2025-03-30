@@ -9,26 +9,55 @@
 <body>
   <div class="container">
     <h1>Inventory Management</h1>
-    <div id="auth_section">
-      <button id="login_btn">Login with Google</button>
-    </div>
-    <div id="inventory_section">
-      <% items.forEach(item => { %>
-        <div class="inventory_cube">
-          <img src="<%= item.image %>" alt="<%= item.itemName %>">
-          <div class="item_info">
-            <h3><%= item.itemName %></h3>
-            <p>Status: <span class="status <%= item.status === 'available' ? 'available' : 'unavailable' %>"><%= item.status %></span></p>
-            <button class="edit_btn">Edit</button>
-            <div class="edit_options">
-              <button class="delete_item">Delete Item</button>
-              <button class="change_status">Change Status</button>
+    
+    <% if (!isMaster) { %>
+      <div id="auth_section">
+        <button id="login_btn">Login with Google</button>
+        <h3>OR</h3>
+        <form action="/login" method="POST">
+          <input type="text" name="username" placeholder="Username" required />
+          <input type="password" name="password" placeholder="Password" required />
+          <button type="submit">Login as Master</button>
+        </form>
+      </div>
+    <% } else { %>
+      <p>You are logged in as the master.</p>
+      <button id="addItemBtn">Add New Item</button> 
+
+      <div id="inventory_section">
+        <% if (items.length === 0) { %>
+          <p>No items found in inventory.</p>
+        <% } else { %>
+          <% items.forEach(item => { %>
+            <div class="inventory_cube">
+              <img src="<%= item.image %>" alt="<%= item.itemName %>">
+              <div class="item_info">
+                <h3><%= item.itemName %></h3>
+                <p>Status: <span class="status <%= item.status === 'available' ? 'available' : 'unavailable' %>"><%= item.status %></span></p>
+                <button class="change_status_btn" onclick="changeStatus('<%= item._id %>', '<%= item.status === 'available' ? 'unavailable' : 'available' %>')">Change Status</button>
+              </div>
             </div>
-          </div>
-        </div>
-      <% }); %>
-    </div>
+          <% }); %>
+        <% } %>
+      </div>
+
+      <a href="/logout">Logout</a>
+    <% } %>
   </div>
+
+  <div id="addItemForm" style="display:none;">
+    <h2>Add New Item</h2>
+    <form id="newItemForm">
+      <input type="text" id="itemName" placeholder="Item Name" required><br>
+      <input type="number" id="itemQuantity" placeholder="Item Quantity" required><br>
+      <input type="number" id="itemPrice" placeholder="Item Price" required><br>
+      <input type="text" id="itemStatus" placeholder="Item Status" required><br>
+      <input type="text" id="itemImage" placeholder="Image URL" required><br>
+      <button type="submit">Add Item</button>
+      <button type="button" onclick="closeAddItemForm()">Cancel</button>
+    </form>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>

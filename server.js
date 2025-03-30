@@ -16,8 +16,14 @@ dotenv.config();
 
 const app = express();
 
-app.set('views', path.join(__dirname, ''));  
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.set('views', path.join(__dirname, ''));
 app.set('view engine', 'ejs');
+
+const MASTER_USERNAME = 'admin';
+const MASTER_PASSWORD = 'admin1234';
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -66,15 +72,6 @@ app.use(express.static(path.join(__dirname)));
 app.use('/api/auth', auth_router);
 app.use('/api/inventory', inventory_router);
 
-app.get('/', async (req, res) => {
-  try {
-    const items = await InventoryItem.find();
-    res.render('index', { items });
-  } catch (error) {
-    res.status(500).send('Error fetching inventory items');
-  }
-});
-
 app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
@@ -86,10 +83,84 @@ app.get('/auth/google/callback',
   }
 );
 
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  if (username === MASTER_USERNAME && password === MASTER_PASSWORD) {
+    req.session.isMaster = true;
+    res.redirect('/');
+  } else {
+    res.status(401).send('Invalid credentials');
+  }
+});
+
 app.get('/logout', (req, res) => {
   req.logout(() => {
     res.redirect('/');
   });
+});
+
+app.post('/addItem', async (req, res) => {
+  try {
+    const { itemName, itemQuantity, itemPrice, status, image } = req.body;
+    const newItem = new InventoryItem({
+      itemName,
+      itemQuantity,
+      itemPrice,
+      status,
+      image
+    });
+    
+    await newItem.save();
+    res.json(newItem);
+  } catch (error) {
+    res.status(500).send('Error adding new item');
+  }
+});
+
+app.post('/editItem/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { itemName, itemQuantity, itemPrice, status, image } = req.body;
+
+    const updatedItem = await InventoryItem.findByIdAndUpdate(id, {
+      itemName,
+      itemQuantity,
+      itemPrice,
+      status,
+      image
+    }, { new: true });
+
+    res.json(updatedItem);
+  } catch (error) {
+    res.status(500).send('Error updating item');
+  }
+});
+
+app.post('/changeStatus/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const updatedItem = await InventoryItem.findByIdAndUpdate(id, {
+      status
+    }, { new: true });
+
+    res.json(updatedItem);
+  } catch (error) {
+    res.status(500).send('Error changing item status');
+  }
+});
+
+app.get('/', async (req, res) => {
+  try {
+    const items = await InventoryItem.find();
+    res.render('index', { 
+      items, 
+      isMaster: req.session.isMaster  
+    });
+  } catch (error) {
+    res.status(500).send('Error fetching inventory items');
+  }
 });
 
 app.listen(8080, () => {
