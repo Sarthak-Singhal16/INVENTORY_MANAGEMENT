@@ -3,7 +3,7 @@ const InventoryItem = require('./inventory_item');
 
 const inventoryRouter = express.Router();
 
-inventoryRouter.post('/add-item', async (req, res) => {
+inventoryRouter.post('/add_item', async (req, res) => {
   const { itemName, itemQuantity, itemPrice } = req.body;
   try {
     const newItem = new InventoryItem({ itemName, itemQuantity, itemPrice });
@@ -23,7 +23,7 @@ inventoryRouter.get('/items', async (req, res) => {
   }
 });
 
-inventoryRouter.put('/update-item/:id', async (req, res) => {
+inventoryRouter.put('/update_item/:id', async (req, res) => {
   const { itemName, itemQuantity, itemPrice } = req.body;
   try {
     const updatedItem = await InventoryItem.findByIdAndUpdate(req.params.id, { itemName, itemQuantity, itemPrice }, { new: true });
@@ -33,7 +33,7 @@ inventoryRouter.put('/update-item/:id', async (req, res) => {
   }
 });
 
-inventoryRouter.delete('/delete-item/:id', async (req, res) => {
+inventoryRouter.delete('/delete_item/:id', async (req, res) => {
   try {
     await InventoryItem.findByIdAndDelete(req.params.id);
     res.json({ message: 'Item deleted from inventory' });

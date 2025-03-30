@@ -4,22 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inventory Management</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="styleeee.css">
 </head>
 <body>
   <div class="container">
     <h1>Inventory Management</h1>
-    <div id="auth-section">
-      <form id="login-form">
-        <input type="text" id="username" placeholder="Username" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-      </form>
-      <form id="register-form">
-        <input type="text" id="register-username" placeholder="Username" required>
-        <input type="password" id="register-password" placeholder="Password" required>
-        <button type="submit">CLICK TO REgISTER</button>
-      </form>
+    <div id="auth_section">
+      <button id="login_btn">Login with Google</button>
+    </div>
+    <div id="inventory_section">
+      <% items.forEach(item => { %>
+        <div class="inventory_cube">
+          <img src="<%= item.image %>" alt="<%= item.itemName %>">
+          <div class="item_info">
+            <h3><%= item.itemName %></h3>
+            <p>Status: <span class="status <%= item.status === 'available' ? 'available' : 'unavailable' %>"><%= item.status %></span></p>
+            <button class="edit_btn">Edit</button>
+            <div class="edit_options">
+              <button class="delete_item">Delete Item</button>
+              <button class="change_status">Change Status</button>
+            </div>
+          </div>
+        </div>
+      <% }); %>
     </div>
   </div>
   <script src="app.js"></script>
